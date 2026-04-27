@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Десна: Рибалка</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+:root {
+    --cyan:       #00e5ff;
+    --gold:       #ffc744;
+    --deep:       #04131a;
+    --panel-bg:   rgba(4,19,26,0.86);
+    --glass:      rgba(0,229,255,0.06);
+    --border:     rgba(0,229,255,0.25);
+    --red:        #ff4d6d;
+    --muted:      #88aab4;
+    --font-title: 'Russo One', sans-serif;
+    --font-body:  'Nunito', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body, html {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: var(--font-body);
+    color: white;
+    background: var(--deep);
+}
+
+/* ── ВІДЕО ФОН ── */
+#bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* ── ОВЕРЛЕЙ ── */
+.bg-overlay {
+    position: fixed; inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.50) 0%,
+        rgba(0,0,0,0.25) 55%,
+        rgba(0,10,20,0.65) 100%
+    );
+    z-index: 1;
+}
+
+/* ── ХВИЛІ (CSS-only) ── */
+.waves {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%;
+    height: 70px;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+.wave {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 200%; height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70'%3E%3Cpath fill='rgba(0,100,140,0.18)' d='M0,35 C180,70 360,0 540,35 C720,70 900,0 1080,35 C1260,70 1440,0 1440,35 L1440,70 L0,70Z'/%3E%3C/svg%3E") repeat-x bottom;
+    background-size: 50% 100%;
+    animation: waveScroll 9s linear infinite;
+    will-change: transform;
+}
+.wave2 {
+    animation-duration: 13s;
+    animation-direction: reverse;
+    opacity: 0.55;
+}
+@keyframes waveScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(50%); }
+}
+
+/* ── ЛАУНЧЕР ── */
+#launcher-layer {
+    position: fixed; inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+/* ── ПАНЕЛЬ ── */
+.panel {
+    position: relative;
+    width: 295px;
+    padding: 30px 26px;
+    text-align: center;
+    border-radius: 26px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    box-shadow:
+        0 0 0 1px rgba(0,229,255,0.07),
+        0 24px 50px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    will-change: transform, opacity;
+}
+
+/* Статичний акцент-кордон */
+.panel::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 27px;
+    background: linear-gradient(135deg, rgba(0,229,255,0.32), transparent 50%, rgba(255,199,68,0.18));
+    z-index: -1;
+}
+
+/* ── ЗАГОЛОВОК ── */
+h2 {
+    font-family: var(--font-title);
+    font-size: 25px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 22px;
+    text-shadow: 0 0 12px var(--cyan), 0 0 35px rgba(0,229,255,0.4);
+}
+h2::after {
+    content: '';
+    display: block;
+    margin: 8px auto 0;
+    width: 44px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    border-radius: 2px;
+}
+
+/* ── КНОПКИ ── */
+.btn {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 13px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(135deg, #00c8ef 0%, #0060d6 100%);
+    box-shadow: 0 4px 18px rgba(0,140,210,0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    will-change: transform;
+}
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-18deg);
+    transition: left 0.45s ease;
+    pointer-events: none;
+}
+.btn:hover::after  { left: 140%; }
+.btn:hover {
+    transform: translateY(-2px) scale(1.025);
+    box-shadow: 0 8px 24px rgba(0,180,240,0.48), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+.btn:active { transform: scale(0.97); transition-duration: 0.08s; }
+
+.btn-exit {
+    background: linear-gradient(135deg, #ff2d55, #c0002e);
+    box-shadow: 0 4px 18px rgba(255,45,85,0.32), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.btn-exit:hover { box-shadow: 0 8px 24px rgba(255,45,85,0.5); }
+.btn-exit::after { display: none; }
+
+.btn-ghost {
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.18);
+    color: var(--muted);
+    box-shadow: none;
+    font-size: 12px;
+    padding: 10px;
+    letter-spacing: 0.5px;
+}
+.btn-ghost::after { display: none; }
+.btn-ghost:hover  { color: #fff; background: rgba(0,229,255,0.11); box-shadow: none; transform: none; }
+
+/* ── ПРОФІЛЬ-РЯДОК ── */
+.row {
+    display: flex;
+    align-items: center;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    padding: 10px 12px;
+    margin-bottom: 7px;
+    border-radius: 10px;
+    transition: background 0.15s;
+}
+.row:hover { background: rgba(0,229,255,0.11); }
+
+.del {
+    color: var(--red);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.del:hover { background: rgba(255,77,109,0.18); }
+
+/* ── ІНПУТ ── */
+input {
+    width: 100%;
+    padding: 11px 13px;
+    margin: 8px 0;
+    background: rgba(0,0,0,0.32);
+    border: 1px solid rgba(0,229,255,0.22);
+    color: #fff;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.12);
+}
+input::placeholder { color: rgba(255,255,255,0.28); }
+
+/* ── ПОСІБНИК ── */
+.guide-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 350px;
+}
+.guide-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+.guide-scroll::-webkit-scrollbar { width: 4px; }
+.guide-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.12); border-radius: 10px; }
+.guide-scroll::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
+
+.fish-card {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.12);
+    border-radius: 13px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.fish-card:hover { background: rgba(0,229,255,0.08); border-color: rgba(0,229,255,0.28); }
+.fish-card.active { background: rgba(4,19,26,0.92); border-color: var(--cyan); }
+
+.fish-card-header {
+    display: flex;
+    align-items: center;
+    padding: 9px 11px;
+}
+.fish-pic-frame {
+    width: 50px; height: 50px;
+    border-radius: 9px;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(0,229,255,0.12);
+    margin-right: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.fish-pic-frame img { max-width: 84%; max-height: 84%; object-fit: contain; }
+.fish-name-main { font-size: 15px; font-weight: 700; flex: 1; text-align: left; }
+.fish-arrow {
+    color: rgba(0,229,255,0.45);
+    font-size: 10px;
+    transition: transform 0.25s ease;
+}
+.fish-card.active .fish-arrow { transform: rotate(180deg); color: var(--cyan); }
+
+.fish-card-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 13px;
+    background: rgba(0,0,0,0.18);
+    border-top: 1px solid transparent;
+    text-align: left;
+}
+.fish-card.active .fish-card-details {
+    max-height: 180px;
+    padding: 12px 13px;
+    border-top-color: rgba(0,229,255,0.12);
+}
+.detail-row { display: flex; align-items: flex-start; font-size: 12px; margin-bottom: 7px; color: #ccc; }
+.detail-row:last-child { margin-bottom: 0; }
+.detail-label {
+    color: var(--cyan);
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 72px;
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+.bait-tag-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.bait-tag {
+    background: rgba(0,229,255,0.09);
+    color: #9ceeff;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid rgba(0,229,255,0.22);
+}
+
+/* ── НАЛАШТУВАННЯ ── */
+.settings-block {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.settings-label { font-size: 14px; font-weight: 600; color: var(--muted); }
+.toggle {
+    width: 44px; height: 24px;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+    flex-shrink: 0;
+}
+.toggle.on  { background: linear-gradient(90deg, #00b0c8, var(--cyan)); box-shadow: 0 0 10px rgba(0,229,255,0.38); }
+.toggle.off { background: #253a42; }
+.toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.25s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.toggle.on::after { left: 23px; }
+
+/* ── ПРО ГРУ ── */
+.about-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 16px;
+    text-align: left;
+    margin-bottom: 12px;
+}
+.about-badge {
+    display: inline-block;
+    background: rgba(255,199,68,0.1);
+    border: 1px solid rgba(255,199,68,0.22);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.about-card p { font-size: 13px; color: #a8c5d0; line-height: 1.65; }
+</style>
+</head>
+
+<body>
+
+<!-- ВІДЕО ФОН -->
+<video id="bg-video" autoplay muted loop playsinline preload="auto">
+    <source src="video/background.mp4"  type="video/mp4">
+    <source src="video/background.webm" type="video/webm">
+    <source src="video/background.mov"  type="video/quicktime">
+</video>
+
+<div class="bg-overlay"></div>
+
+<div class="waves">
+    <div class="wave"></div>
+    <div class="wave wave2"></div>
+</div>
+
+<div id="launcher-layer">
+    <div class="panel">
+        <h2 id="l-title">ДЕСНА</h2>
+        <div id="l-content"></div>
+    </div>
+</div>
+
+<audio id="bg-audio" src="music.mp3" loop></audio>
+<audio id="click-sound" src="knopka.mp3"></audio>
+
+<script>
+const SCENES = { MAIN:"main", PROFILES:"profiles", SETTINGS:"settings", ABOUT:"about", GUIDE:"guide", ONLINE:"online" };
+
+const GEAR_DATA = {
+    fish: [
+        {n:"Плітка",         min:0.1,  max:1.8,   img:"Fish/pl.png"},
+        {n:"Карась",         min:0.3,  max:3.5,   img:"Fish/karas.png"},
+        {n:"Срібний карась", min:0.4,  max:4.5,   img:"Fish/karas1.png"},
+        {n:"Линь",           min:0.5,  max:6.0,   img:"Fish/lin.png"},
+        {n:"Линок",          min:0.4,  max:5.5,   img:"Fish/lyn.png"},
+        {n:"Щука",           min:1.0,  max:25.0,  img:"Fish/shuka.png"},
+        {n:"Окунь",          min:0.3,  max:2.5,   img:"Fish/okun.png"},
+        {n:"Йорж",           min:0.1,  max:1.2,   img:"Fish/yor.png"},
+        {n:"Краснопірка",    min:0.2,  max:1.5,   img:"Fish/kras.png"},
+        {n:"Лящ",            min:0.6,  max:8.5,   img:"Fish/lyash.png"},
+        {n:"Короп",          min:2.0,  max:55.0,  img:"Fish/korop.png"},
+        {n:"Білий амур",     min:3.0,  max:40.0,  img:"Fish/amur.png"},
+        {n:"Сазан",          min:4.0,  max:65.0,  img:"Fish/sazan.png"},
+        {n:"Сом",            min:5.0,  max:120.0, img:"Fish/som.png"},
+        {n:"Густера",        min:0.3,  max:3.0,   img:"Fish/gustera.png"},
+        {n:"Судак",          min:1.2,  max:18.0,  img:"Fish/sudak.png"},
+        {n:"Головень",       min:0.5,  max:7.0,   img:"Fish/Chub.png"},
+        {n:"Жерех",          min:1.5,  max:12.0,  img:"Fish/zhereh.png"},
+        {n:"Чехоня",         min:0.3,  max:2.0,   img:"Fish/chehon.png"},
+        {n:"Верховодка",     min:0.05, max:0.5,   img:"Fish/verhovka.png"},
+        {n:"Стерлядь",       min:2.0,  max:20.0,  img:"Fish/sterl.png"}
+    ],
+    baits: [
+        {n:"Хліб",      target:["Плітка","Краснопірка","Верховодка","Густера"]},
+        {n:"Черв'як",   target:["Окунь","Срібний карась","Карась","Линь","Линок","Плітка","Йорж","Густера","Лящ","Судак"]},
+        {n:"Опариш",    target:["Плітка","Густера","Чехоня","Верховодка","Лящ","Краснопірка"]},
+        {n:"Тісто",     target:["Лящ","Плітка","Карась","Густера","Краснопірка","Линь"]},
+        {n:"Перловка",  target:["Лящ","Плітка","Густера","Карась"]},
+        {n:"Кукурудза", target:["Короп","Білий амур","Сазан","Лящ","Карась"]},
+        {n:"Живець",    target:["Щука","Судак","Сом","Жерех","Головень","Стерлядь"]}
+    ]
+};
+
+let L_DATA = JSON.parse(localStorage.getItem('fishing_desna_v3')) || {
+    profiles: [],
+    settings: { sound: true }
+};
+
+const audio      = document.getElementById('bg-audio');
+const clickSound = document.getElementById('click-sound');
+
+/* ── ЗВУК ── */
+function playClick() {
+    if (L_DATA.settings.sound && clickSound) {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {});
+    }
+}
+function initMusic() {
+    if (audio && L_DATA.settings.sound && audio.paused) {
+        audio.play().catch(() => {});
+        audio.volume = 0.4;
+    }
+}
+
+/* ── АНІМАЦІЯ — легка, тільки контент ── */
+let panelShown = false;
+function animateIn() {
+    if (!panelShown) {
+        gsap.from(".panel", { y: 32, opacity: 0, scale: 0.96, duration: 0.48, ease: "power3.out" });
+        panelShown = true;
+    }
+    gsap.from("#l-content > *", {
+        y: 8, opacity: 0,
+        stagger: 0.055,
+        duration: 0.25,
+        ease: "power2.out",
+        clearProps: "all"
+    });
+}
+
+window.goToScene = scene => { playClick(); renderMenu(scene); };
+
+/* ── РЕНДЕР ── */
+function renderMenu(scene) {
+    initMusic();
+    const content = document.getElementById('l-content');
+    const title   = document.getElementById('l-title');
+
+    if (scene === SCENES.MAIN) {
+        title.innerText = "ДЕСНА";
+        content.innerHTML = `
+            <button class="btn" onclick="goToScene(SCENES.PROFILES)">🎣 Грати</button>
+            <button class="btn" style="background:linear-gradient(135deg,#00b09b,#0060d6);" onclick="goToScene(SCENES.ONLINE)">🌐 Онлайн</button>
+            <button class="btn" onclick="goToScene(SCENES.GUIDE)">📖 Посібник</button>
+            <button class="btn" onclick="goToScene(SCENES.SETTINGS)">⚙️ Налаштування</button>
+            <button class="btn" onclick="goToScene(SCENES.ABOUT)">ℹ️ Про гру</button>
+            <button class="btn btn-exit" onclick="exitApp()">✖ Вихід</button>`;
+    }
+
+    if (scene === SCENES.PROFILES) {
+        title.innerText = "ПРОФІЛІ";
+        const list = L_DATA.profiles.map((p, i) => `
+            <div class="row">
+                <div style="cursor:pointer;flex:1;text-align:left;font-weight:700;font-size:14px;"
+                     onclick="startProfile(${i})">👤 ${p.name}</div>
+                <span class="del" onclick="deleteProfile(${i})">✕</span>
+            </div>`).join("");
+        content.innerHTML = `
+            <div style="max-height:195px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:8px;">
+                ${list || `<p style="color:var(--muted);font-size:13px;padding:12px 0;">Створіть свій перший профіль</p>`}
+            </div>
+            <input id="newName" placeholder="Ім'я рибака..." maxlength="12">
+            <button class="btn" onclick="addProfile()">+ Створити профіль</button>
+            <button class="btn btn-ghost" onclick="goToScene(SCENES.MAIN)">← Назад</button>`;
+    }
+
+    if (scene === SCENES.GUIDE) {
+        title.innerText = "ПОСІБНИК";
+        const cards = GEAR_DATA.fish.map(fish => {
+            const baits = GEAR_DATA.baits
+                .filter(b => b.target.includes(fish.n))
+                .map(b => `<span class="bait-tag">${b.n}</span>`).join("");
+            return `
+                <div class="fish-card" onclick="this.classList.toggle('active');playClick();">
+                    <div class="fish-card-header">
+                        <div class="fish-pic-frame">
+                            <img src="${fish.img}" alt="${fish.n}" loading="lazy">
+                        </div>
+                        <div class="fish-name-main">${fish.n}</div>
+                        <div class="fish-arrow">▼</div>
+                    </div>
+                    <div class="fish-card-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Вага:</span>
+                            <span>${fish.min} — ${fish.max} кг</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Наживка:</span>
+                            <div class="bait-tag-list">${baits || `<span style="color:var(--muted)">Будь-яка</span>`}</div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join("");
+        content.innerHTML = `
+            <div class="guide-wrapper">
+                <div class="guide-scroll">${cards}</div>
+                <button class="btn btn-ghost" onclick="goToScene(SCENES.MAIN)">← Назад</button>
+            </div>`;
+    }
+
+    if (scene === SCENES.SETTINGS) {
+        title.innerText = "ОПЦІЇ";
+        const on = L_DATA.settings.sound;
+        content.innerHTML = `
+            <div class="settings-block">
+                <span class="settings-label">🔊 Звуки</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:11px;font-weight:700;color:${on ? 'var(--cyan)' : 'var(--muted)'};">
+                        ${on ? 'УВІМК' : 'ВИМК'}
+                    </span>
+                    <div class="toggle ${on ? 'on' : 'off'}" onclick="toggleSound()"></div>
+                </div>
+            </div>
+            <button class="btn btn-ghost" onclick="goToScene(SCENES.MAIN)">← Назад</button>`;
+    }
+
+    if (scene === SCENES.ABOUT) {
+        title.innerText = "ПРО ГРУ";
+        content.innerHTML = `
+            <div class="about-card">
+                <div class="about-badge">🏆 Десна · Рибалка</div>
+                <p>Справжня риболовля на річці Десна! Купуй вудки, вибирай наживку, лови трофеї та розвивай свого рибака.</p>
+            </div>
+            <button class="btn btn-ghost" onclick="goToScene(SCENES.MAIN)">← Назад</button>`;
+    }
+
+    if (scene === SCENES.ONLINE) {
+        title.innerText = "ОНЛАЙН";
+
+        /* ─── Окремі онлайн-профілі ─── */
+        const OL_KEY = 'fishing_desna_online_v1';
+        let olProfs = JSON.parse(localStorage.getItem(OL_KEY) || '[]');
+        const saveOlProfs = () => localStorage.setItem(OL_KEY, JSON.stringify(olProfs));
+
+        if (window._olSel === undefined || window._olSel >= olProfs.length)
+            window._olSel = olProfs.length > 0 ? 0 : -1;
+        if (!window._olTab) window._olTab = 'code';
+
+        const renderOlProfs = () => {
+            const el = document.getElementById('olpl');
+            if (!el) return;
+            if (!olProfs.length) {
+                el.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:6px 0 10px;">Додайте нікнейм для онлайн гри</p>';
+                return;
+            }
+            el.innerHTML = olProfs.map((pr, i) => `
+            <div class="row" style="cursor:pointer;padding:8px 10px;border-radius:10px;margin-bottom:4px;
+                 background:${window._olSel===i?'rgba(0,229,255,.1)':'rgba(255,255,255,.04)'};
+                 border:1px solid ${window._olSel===i?'rgba(0,229,255,.4)':'rgba(255,255,255,.07)'};"
+                 onclick="window._olSel=${i};renderOlProfsGlobal()">
+                <div style="flex:1;font-weight:700;font-size:13px;">
+                    ${window._olSel===i?'<span style=\'color:var(--cyan)\'>✓ </span>':''}🎣 ${pr.name}
+                </div>
+                <span class="del" onclick="event.stopPropagation();olDelProf(${i})">✕</span>
+            </div>`).join('');
+        };
+
+        window.renderOlProfsGlobal = renderOlProfs;
+
+        window.olDelProf = i => {
+            if (!confirm('Видалити?')) return;
+            olProfs.splice(i, 1);
+            if (window._olSel >= olProfs.length) window._olSel = olProfs.length - 1;
+            saveOlProfs(); renderOlProfs();
+        };
+
+        window.olAddProf = () => {
+            const inp = document.getElementById('olnm');
+            const name = inp ? inp.value.trim() : '';
+            if (name.length < 2) { alert('Мінімум 2 символи!'); return; }
+            if (olProfs.length >= 5) { alert('Максимум 5 профілів!'); return; }
+            olProfs.push({ name });
+            window._olSel = olProfs.length - 1;
+            saveOlProfs();
+            if (inp) inp.value = '';
+            renderOlProfs();
+        };
+
+        window.olGetPlayer = () => {
+            if (window._olSel < 0 || !olProfs[window._olSel]) {
+                alert('Оберіть або створіть онлайн-профіль!'); return null;
+            }
+            return olProfs[window._olSel];
+        };
+
+        window.olSetTab = t => {
+            window._olTab = t;
+            ['wifi','code','bt'].forEach(x => {
+                const b = document.getElementById('otab2-'+x);
+                const s = document.getElementById('otsec-'+x);
+                if (b) b.style.opacity = x===t ? '1' : '.4';
+                if (s) s.style.display  = x===t ? '' : 'none';
+            });
+        };
+
+        window.olCreate = () => {
+            if (!olGetPlayer()) return;
+            const wrap = document.getElementById('ol-create-opts');
+            if (wrap) wrap.style.display = wrap.style.display === 'none' ? '' : 'none';
+            olSetTab(window._olTab);
+        };
+
+        window.olConfirmCreate = () => {
+            const player = olGetPlayer(); if (!player) return;
+            window.parent.postMessage({
+                type: 'START_GAME', player,
+                online: { mode: 'create', transport: window._olTab, param: '' }
+            }, '*');
+        };
+
+        window.olBrowse = () => {
+            const player = olGetPlayer(); if (!player) return;
+            showRoomBrowser(player);
+        };
+
+        content.innerHTML = `
+<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.5px;margin-bottom:5px;">ВАШ НІКНЕЙМ</div>
+<div id="olpl"></div>
+<div style="display:flex;gap:6px;margin-bottom:14px;">
+    <input id="olnm" placeholder="Новий нікнейм..." maxlength="14" style="flex:1;">
+    <button class="btn" style="width:auto;padding:10px 14px;margin:0;font-size:13px;" onclick="olAddProf()">＋</button>
+</div>
+
+<button class="btn" style="background:linear-gradient(135deg,#00b09b,#0060d6);margin-bottom:8px;" onclick="olCreate()">
+    ＋ Створити кімнату
+</button>
+
+<button class="btn" style="background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);margin-bottom:10px;" onclick="olBrowse()">
+    🔍 Знайти кімнату
+</button>
+
+<div id="ol-create-opts" style="display:none;margin-bottom:8px;padding:12px;background:rgba(0,0,0,.25);border-radius:12px;border:1px solid rgba(255,255,255,.08);">
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">ТИП З'ЄДНАННЯ</div>
+    <div style="display:flex;gap:5px;margin-bottom:8px;">
+        <button class="btn" id="otab2-code" style="flex:1;padding:8px 2px;font-size:10px;margin:0;" onclick="olSetTab('code')">🌍 Код</button>
+        <button class="btn" id="otab2-wifi" style="flex:1;padding:8px 2px;font-size:10px;margin:0;opacity:.4;" onclick="olSetTab('wifi')">📶 Wi-Fi</button>
+        <button class="btn" id="otab2-bt"   style="flex:1;padding:8px 2px;font-size:10px;margin:0;opacity:.4;" onclick="olSetTab('bt')">🔵 BT</button>
+    </div>
+    <div id="otsec-code" style="font-size:11px;color:var(--muted);margin-bottom:8px;">Через інтернет. Код з'явиться після створення.</div>
+    <div id="otsec-wifi" style="font-size:11px;color:var(--muted);margin-bottom:8px;display:none;">Всі пристрої в одній Wi-Fi мережі.</div>
+    <div id="otsec-bt"   style="font-size:11px;color:var(--muted);margin-bottom:8px;display:none;">Спочатку спаруйте телефони в Android → Bluetooth.</div>
+    <button class="btn" style="background:linear-gradient(135deg,#00b09b,#00e090);" onclick="olConfirmCreate()">▶ Підтвердити та створити</button>
+</div>
+
+<button class="btn btn-ghost" onclick="goToScene(SCENES.MAIN)">← Назад</button>
+`;
+        renderOlProfs();
+    }
+
+    animateIn();
+}
+
+/* ════ ROOM BROWSER ════ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+window.showRoomBrowser = (player) => {
+    const old = document.getElementById('room-browser');
+    if (old) old.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'room-browser';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:50000;background:rgba(4,8,10,.98);display:flex;flex-direction:column;font-family:"Nunito","Inter",sans-serif;color:#fff;';
+    modal.innerHTML = `
+<div style="background:rgba(0,229,255,.06);border-bottom:1px solid rgba(0,229,255,.2);padding:13px 15px;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <button onclick="document.getElementById('room-browser').remove()"
+        style="background:rgba(255,255,255,.08);border:none;color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;">← Назад</button>
+    <div style="flex:1;">
+        <div style="font-family:'Russo One',sans-serif;font-size:15px;letter-spacing:3px;text-shadow:0 0 12px #00e5ff;">🌐 КІМНАТИ</div>
+        <div id="rb-count" style="font-size:10px;color:rgba(0,229,255,.5);letter-spacing:1px;">пошук...</div>
+    </div>
+    <button onclick="rbRefresh()" id="rb-refresh"
+        style="background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.28);color:#00e5ff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;">↻</button>
+</div>
+
+<div style="padding:8px 12px;background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <input id="rb-filter" placeholder="Пошук..." maxlength="20"
+        style="flex:1;padding:7px 10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:8px;font-size:12px;outline:none;font-family:inherit;"
+        oninput="rbFilter()">
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 72px 55px 50px;padding:7px 13px;font-size:10px;font-weight:800;letter-spacing:.8px;color:rgba(255,255,255,.35);border-bottom:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.18);flex-shrink:0;">
+    <div>НАЗВА / ХОСТ</div>
+    <div style="text-align:center;">ГРАВЦІ</div>
+    <div style="text-align:center;">ТИП</div>
+    <div style="text-align:center;">СТАТУС</div>
+</div>
+
+<div id="rb-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div id="rb-loading" style="text-align:center;padding:50px 20px;color:rgba(255,255,255,.3);">
+        <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+        <div style="font-size:13px;">Пошук кімнат...</div>
+    </div>
+</div>
+
+<div style="padding:11px 14px;border-top:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.2);flex-shrink:0;display:flex;gap:8px;align-items:center;">
+    <div style="font-size:11px;color:rgba(255,255,255,.35);">Код вручну:</div>
+    <input id="rb-manual" placeholder="XXXXXX" maxlength="6"
+        style="width:85px;padding:6px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(0,229,255,.25);color:#00e5ff;border-radius:7px;font-size:13px;outline:none;text-align:center;letter-spacing:3px;text-transform:uppercase;font-weight:700;">
+    <button onclick="rbJoinManual()"
+        style="padding:6px 14px;background:rgba(0,229,255,.15);border:1px solid rgba(0,229,255,.3);color:#00e5ff;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">→ Вхід</button>
+</div>`;
+    document.body.appendChild(modal);
+
+    let allRooms = [];
+
+    const typeIcon = { code:'🌍', wifi:'📶', bt:'🔵' };
+    const typeLabel= { code:'Код', wifi:'Wi-Fi', bt:'BT' };
+
+    function renderList(rooms) {
+        const list = document.getElementById('rb-list');
+        const cnt  = document.getElementById('rb-count');
+        if (!list) return;
+        if (cnt) cnt.textContent = rooms.length + ' кімнат знайдено';
+        if (!rooms.length) {
+            list.innerHTML = `<div style="text-align:center;padding:50px 20px;color:rgba(255,255,255,.28);">
+                <div style="font-size:38px;margin-bottom:12px;">🎣</div>
+                <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Кімнат не знайдено</div>
+                <div style="font-size:12px;line-height:1.7;">Попросіть друга створити кімнату<br>або введіть код вручну знизу</div>
+            </div>`;
+            return;
+        }
+        list.innerHTML = rooms.map(r => {
+            const full = r.players >= r.max;
+            const dot  = full ? '#ff6b6b' : '#00ff88';
+            return `<div onclick="${full ? '' : 'rbJoin(\'' + r.code + '\',\'' + r.transport + '\',\'' + (r.param||r.code) + '\')'}"
+                style="display:grid;grid-template-columns:1fr 72px 55px 50px;padding:12px 13px;
+                       border-bottom:1px solid rgba(255,255,255,.05);
+                       cursor:${full?'not-allowed':'pointer'};
+                       opacity:${full?'.55':'1'};
+                       transition:background .15s;"
+                onmouseover="if(!${full})this.style.background='rgba(0,229,255,.07)'"
+                onmouseout="this.style.background='transparent'">
+                <div>
+                    <div style="font-weight:700;font-size:13px;margin-bottom:2px;">${esc(r.name)}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.38);">👤 ${esc(r.host)}</div>
+                </div>
+                <div style="text-align:center;display:flex;align-items:center;justify-content:center;gap:3px;">
+                    <span style="font-weight:800;font-size:14px;color:${dot}">${r.players}</span>
+                    <span style="color:rgba(255,255,255,.28);font-size:11px;">/${r.max}</span>
+                </div>
+                <div style="text-align:center;display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,.5);">
+                    ${typeIcon[r.transport]||'🌐'} ${typeLabel[r.transport]||''}
+                </div>
+                <div style="text-align:center;display:flex;align-items:center;justify-content:center;">
+                    <span style="width:9px;height:9px;border-radius:50%;background:${dot};display:inline-block;box-shadow:0 0 6px ${dot};"></span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.rbFilter = () => {
+        const q = (document.getElementById('rb-filter')?.value||'').toLowerCase();
+        renderList(q ? allRooms.filter(r => r.name.toLowerCase().includes(q) || r.host.toLowerCase().includes(q)) : allRooms);
+    };
+
+    window.rbJoin = (code, transport, param) => {
+        modal.remove();
+        window.parent.postMessage({ type:'START_GAME', player, online:{ mode:'join', transport, param: param||code } }, '*');
+    };
+
+    window.rbJoinManual = () => {
+        const code = (document.getElementById('rb-manual')?.value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+        if (code.length !== 6) { alert('Введіть рівно 6 символів!'); return; }
+        modal.remove();
+        window.parent.postMessage({ type:'START_GAME', player, online:{ mode:'join', transport:'code', param:code } }, '*');
+    };
+
+    window.rbRefresh = () => {
+        const btn = document.getElementById('rb-refresh');
+        if (btn) btn.textContent = '…';
+        fetchRooms(() => { if (btn) btn.textContent = '↻'; });
+    };
+
+    function fetchRooms(done) {
+        const loading = document.getElementById('rb-loading');
+        if (loading) { loading.style.display=''; loading.innerHTML='<div style="text-align:center;padding:50px 20px;color:rgba(255,255,255,.3);"><div style="font-size:32px;margin-bottom:10px;">⏳</div><div style="font-size:13px;">Пошук кімнат...</div></div>'; }
+
+        function tryLoad() {
+            if (!window.Peer) {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js';
+                s.onload = doFetch;
+                s.onerror = () => {
+                    if (loading) loading.innerHTML = '<div style="text-align:center;padding:40px;color:#ff6b6b;">Немає інтернет-з\'єднання</div>';
+                    if (done) done();
+                };
+                document.head.appendChild(s);
+            } else { doFetch(); }
+        }
+
+        function doFetch() {
+            const PCFG = { host:'0.peerjs.com', port:443, path:'/', secure:true, debug:0,
+                config:{ iceServers:[{urls:'stun:stun.l.google.com:19302'}] } };
+            const tmp = new Peer(undefined, PCFG);
+            let done_ = false;
+
+            const t = setTimeout(() => {
+                if (!done_) { done_=true; try{tmp.destroy();}catch(e){}
+                    allRooms=[]; if(loading) loading.style.display='none';
+                    renderList([]); if(done) done(); }
+            }, 8000);
+
+            tmp.on('open', () => {
+                // Try to connect to lobby registry peer
+                const conn = tmp.connect('desna-lobby-v4', { reliable:true, serialization:'json' });
+                conn.on('open', () => { conn.send({ e:'get_rooms' }); });
+                conn.on('data', d => {
+                    if (d.e === 'room_list') {
+                        clearTimeout(t); done_=true;
+                        const now = Date.now();
+                        allRooms = Object.values(d.rooms||{}).filter(r => (now - r.ts) < 120000);
+                        if(loading) loading.style.display='none';
+                        renderList(allRooms);
+                        try{tmp.destroy();}catch(e){}
+                        if(done) done();
+                    }
+                });
+                conn.on('error', () => {
+                    clearTimeout(t); done_=true;
+                    allRooms=[];
+                    if(loading) loading.innerHTML='<div style="text-align:center;padding:50px 20px;color:rgba(255,255,255,.28);"><div style="font-size:38px;margin-bottom:12px;">🎣</div><div style="font-size:14px;font-weight:700;margin-bottom:8px;">Кімнат не знайдено</div><div style="font-size:12px;line-height:1.7;">Ніхто ще не створив кімнату.<br>Поділіться кодом вручну знизу.</div></div>';
+                    try{tmp.destroy();}catch(e){}
+                    if(done) done();
+                });
+            });
+
+            tmp.on('error', er => {
+                clearTimeout(t);
+                if (!done_) {
+                    done_=true;
+                    if(loading) loading.innerHTML='<div style="text-align:center;padding:40px;color:#ff6b6b;font-size:13px;">Помилка мережі: '+esc(er.type)+'</div>';
+                    if(done) done();
+                }
+            });
+        }
+
+        tryLoad();
+    }
+
+    fetchRooms();
+};
+
+/* ── ЛОГІКА ── */
+window.addProfile = () => {
+    const name = document.getElementById('newName').value.trim();
+    if (name.length < 2) return alert("Ім'я занадто коротке!");
+    if (L_DATA.profiles.length >= 5) return alert("Максимум 5 профілів!");
+    L_DATA.profiles.push({ name, money: 500, level: 1, inv: [] });
+    saveData();
+    renderMenu(SCENES.PROFILES);
+};
+
+window.deleteProfile = i => {
+    if (confirm("Видалити цей профіль?")) {
+        L_DATA.profiles.splice(i, 1);
+        saveData();
+        renderMenu(SCENES.PROFILES);
+    }
+};
+
+window.startProfile = i => {
+    window.parent.postMessage({ type: 'START_GAME', player: L_DATA.profiles[i] }, '*');
+};
+
+/* ── ВИХІД — закриває додаток ── */
+window.exitApp = () => {
+    if (!confirm("Вийти з гри?")) return;
+    try { audio.pause(); } catch(e) {}
+
+    // Android WebView (Cordova/Capacitor)
+    if (typeof navigator !== 'undefined' && navigator.app && navigator.app.exitApp) {
+        navigator.app.exitApp(); return;
+    }
+    if (window.Capacitor) {
+        try { window.Capacitor.Plugins.App.exitApp(); return; } catch(e) {}
+    }
+    // Android нативний інтерфейс
+    try { Android.exitApp(); return; } catch(e) {}
+    // iOS WKWebView
+    try { window.webkit.messageHandlers.exitApp.postMessage('exit'); return; } catch(e) {}
+    // Повідомлення батьківському фрейму
+    window.parent.postMessage({ type: 'EXIT_APP' }, '*');
+    // Fallback
+    window.close();
+};
+
+/* ── ONLINE HELPERS ── */
+window.olTab = (t) => {
+    window._olTransport = t;
+    ['bt','wifi','code'].forEach(x => {
+        const btn = document.getElementById('otab-'+x);
+        const sec = document.getElementById('ol-'+x);
+        if (btn) btn.style.opacity = (x===t) ? '1' : '.45';
+        if (sec) sec.style.display = (x===t) ? '' : 'none';
+    });
+};
+
+window.startOnline = (mode, transport) => {
+    transport = transport || window._olTransport || 'code';
+
+    // Перевіряємо онлайн-профіль
+    const OL_KEY = 'fishing_desna_online_profiles';
+    const olProfiles = JSON.parse(localStorage.getItem(OL_KEY) || '[]');
+    const selIdx = window._olSelProfile;
+    if (typeof selIdx !== 'number' || selIdx < 0 || !olProfiles[selIdx]) {
+        alert("Оберіть або створіть онлайн-профіль!");
+        return;
+    }
+    const player = { ...olProfiles[selIdx], isOnline: true };
+
+    let param = '';
+
+    if (transport === 'code') {
+        if (mode === 'join') {
+            param = (document.getElementById('ol-codein') ? document.getElementById('ol-codein').value : '').trim().toUpperCase();
+            if (param.length < 6) { alert("Введіть 6-значний код кімнати!"); return; }
+        }
+    } else if (transport === 'wifi') {
+        if (mode === 'join') {
+            param = (document.getElementById('ol-wifi-ip') ? document.getElementById('ol-wifi-ip').value : '').trim();
+            if (!param || !param.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+                alert("Введіть коректний IP-адрес хоста (напр. 192.168.1.5)");
+                return;
+            }
+        }
+    } else if (transport === 'bt') {
+        if (mode === 'join') {
+            if (!window._olBtTarget) { alert("Оберіть BT пристрій зі списку!"); return; }
+            param = window._olBtTarget;
+        }
+    }
+
+    window.parent.postMessage({
+        type: 'START_GAME',
+        player,
+        online: { mode, transport, param }
+    }, '*');
+};
+
+function saveData() {
+    localStorage.setItem('fishing_desna_v3', JSON.stringify(L_DATA));
+}
+
+window.toggleSound = () => {
+    L_DATA.settings.sound = !L_DATA.settings.sound;
+    if (!L_DATA.settings.sound) audio.pause();
+    else audio.play().catch(() => {});
+    saveData();
+    renderMenu(SCENES.SETTINGS);
+};
+
+document.addEventListener('DOMContentLoaded', () => renderMenu(SCENES.MAIN));
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FISHING:DESNA</title>
+    <style>
+        body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000}
+        #game-frame{width:100%;height:100%;border:none}
+        #ls{position:fixed;inset:0;z-index:9999;background:#04131a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .6s}
+        #ls.out{opacity:0;pointer-events:none}
+        .ls-fish{font-size:40px;animation:lsBob 1.1s ease-in-out infinite alternate}
+        @keyframes lsBob{from{transform:translateY(-6px)}to{transform:translateY(6px)}}
+        .ls-title{font-family:'Russo One',sans-serif;font-size:26px;letter-spacing:6px;color:#fff;text-shadow:0 0 20px #00e5ff,0 0 40px rgba(0,229,255,.3)}
+        .ls-bar{width:180px;height:4px;background:rgba(0,229,255,.12);border-radius:4px;overflow:hidden}
+        .ls-fill{height:100%;width:0;background:linear-gradient(90deg,#00c8ef,#00e5ff);border-radius:4px;animation:lsFill 1.8s ease forwards}
+        @keyframes lsFill{0%{width:0}60%{width:70%}100%{width:100%}}
+        .ls-sub{font-family:sans-serif;font-size:12px;color:rgba(0,229,255,.5);letter-spacing:2px}
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="ls">
+    <div class="ls-fish">🎣</div>
+    <div class="ls-title">FISHING:DESNA</div>
+    <div class="ls-bar"><div class="ls-fill"></div></div>
+    <div class="ls-sub">ЗАВАНТАЖЕННЯ...</div>
+</div>
+
+<iframe id="game-frame" src="launcher.html"></iframe>
+
+<audio id="bg-music" preload="auto"></audio>
+
+<script>
+/* ══ LOADING SCREEN ══ */
+var _lsHidden = false;
+function hideLS(){
+    if(_lsHidden) return; _lsHidden=true;
+    var ls=document.getElementById('ls');
+    ls.classList.add('out');
+    setTimeout(function(){ls.remove();},700);
+}
+setTimeout(hideLS, 2800);
+
+/* ══ MASTER MUSIC ══ */
+const TRACKS=[
+    "Sergio Medved - 03.08.25(1).mp3","Sergio Medved - 04.01.26.mp3",
+    "Sergio Medved - 12.11.25.mp3","Sergio Medved - 19.10.25.mp3",
+    "Sergio Medved - 21.10.25.mp3","Sergio Medved - 22.03.26(1).mp3",
+    "Sergio Medved - 24.01.26(2).mp3","Sergio Medved - 25.10.25(1).mp3",
+    "Sergio Medved - 25.11.25.mp3","Sergio Medved - 04.11.23.mp3",
+    "Sergio Medved - 09.01.26.mp3","Sergio Medved - 03.09.25.mp3",
+    "Sergio Medved - 04.02.26.mp3","Sergio Medved - 06.12.25.mp3",
+    "Sergio Medved - 07.02.26.mp3","Sergio Medved - 16.12.24.mp3",
+    "Sergio Medved - 19.07.24.mp3","Sergio Medved - 20.11.25.mp3",
+    "Sergio Medved - 22.07.25.mp3","Sergio Medved - 18.09.25.mp3",
+    "Sergio Medved - 25.12.25.mp3"
+];
+const music=document.getElementById('bg-music');
+let curIdx=Math.floor(Math.random()*TRACKS.length);
+let musicOn=true, started=false;
+
+function loadTrack(idx){
+    music.src=TRACKS[idx]; music.volume=0.3; music.loop=false;
+}
+function playMusic(){if(musicOn) music.play().catch(function(){});}
+music.addEventListener('ended',function(){
+    var n; do{n=Math.floor(Math.random()*TRACKS.length);}while(n===curIdx&&TRACKS.length>1);
+    curIdx=n; loadTrack(curIdx); playMusic();
+});
+function tryStart(){
+    if(started||!musicOn) return; started=true;
+    loadTrack(curIdx); playMusic();
+}
+document.addEventListener('click', tryStart, {once:true});
+document.addEventListener('touchstart', tryStart, {once:true});
+
+const frame=document.getElementById('game-frame');
+
+/* ══ MESSAGE HANDLER ══ */
+window.addEventListener('message',function(e){
+    var d=e.data; if(!d||!d.type) return;
+
+    if(d.type==='LAUNCHER_READY') hideLS();
+    if(d.type==='USER_INTERACTED') tryStart();
+
+    if(d.type==='SET_VOLUME')  music.volume=d.volume;
+    if(d.type==='STOP_MUSIC')  music.pause();
+    if(d.type==='PLAY_MUSIC')  { if(musicOn) music.play().catch(function(){}); }
+    if(d.type==='SOUND_SETTING'){
+        musicOn=d.enabled;
+        if(!musicOn){ music.pause(); }
+        else { if(!started){started=true;loadTrack(curIdx);} music.play().catch(function(){}); }
+    }
+
+    if(d.type==='START_GAME'){
+        sessionStorage.setItem('active_profile', JSON.stringify(d.player));
+        // Pass online params if present
+        if(d.online){
+            sessionStorage.setItem('online_mode',      d.online.mode      || '');
+            sessionStorage.setItem('online_transport',  d.online.transport || 'code');
+            sessionStorage.setItem('online_param',      d.online.param     || '');
+        } else {
+            sessionStorage.removeItem('online_mode');
+            sessionStorage.removeItem('online_transport');
+            sessionStorage.removeItem('online_param');
+        }
+        sessionStorage.setItem('music_state', JSON.stringify({
+            trackIndex:curIdx, paused:music.paused, volume:music.volume, enabled:musicOn
+        }));
+        frame.src='game.html';
+    }
+
+    if(d.type==='EXIT_TO_MENU') frame.src='launcher.html';
+    if(d.type==='REQUEST_MUSIC_STATE'){
+        try{ frame.contentWindow.postMessage({type:'MUSIC_STATE',trackIndex:curIdx,paused:music.paused,volume:music.volume,musicEnabled:musicOn},'*'); }catch(ex){}
+    }
+});
+
+frame.addEventListener('load',function(){
+    setTimeout(function(){
+        try{ frame.contentWindow.postMessage({type:'MUSIC_STATE',trackIndex:curIdx,paused:music.paused,volume:music.volume,musicEnabled:musicOn},'*'); }catch(ex){}
+    },300);
+});
+</script>
+</body>
+</html>
